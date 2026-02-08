@@ -1,7 +1,7 @@
 # Complier GUI
 
 <p align="center">
-  Desktop-first Prompt Compiler experience powered by Electron + FastAPI + Next.js.
+  <strong>Desktop-first Prompt Compiler experience powered by Electron + FastAPI + Next.js</strong>
 </p>
 
 <p align="center">
@@ -11,61 +11,67 @@
   <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/python-%3E%3D3.10-3776AB" /></a>
 </p>
 
+---
+
 ## Overview
 
-`Complier GUI`, [madara88645/Compiler](https://github.com/madara88645/Compiler) projesi temel alinip masaustu kullanim icin Electron ile paketlenmis bir surumdur.
+**Complier GUI** is a desktop application built on top of [madara88645/Compiler](https://github.com/madara88645/Compiler), packaged with Electron for seamless local usage.
 
-Bu repo:
-- `core/` altinda Compiler cekirdegini calistirir.
-- `electron/main.js` ile backend + frontend servislerini otomatik baslatir.
-- GUI icinden LLM provider/model/base URL/token ayarlarini yonetir.
+This repository:
+- Runs the Compiler core under `core/`
+- Automatically starts backend + frontend services via `electron/main.js`
+- Provides in-app management for LLM provider, model, base URL, and API key settings
 
 ## Features
 
-- Electron tabanli masaustu arayuz
-- Prompt compile + optimize + offline mod
-- Context Manager (RAG) yukleme ve arama
-- Quality Coach (validate/fix)
-- Provider destegi:
-  - OpenAI-compatible
+- **Electron-based desktop interface** - Native window experience
+- **Prompt compilation** - Compile, optimize, and run in offline mode
+- **Context Manager (RAG)** - Upload and search documents
+- **Quality Coach** - Validate and fix prompts
+- **Multi-provider support:**
+  - OpenAI-compatible endpoints
   - OpenAI
   - Anthropic
   - Gemini
-- TR/EN dil anahtari
+- **Language toggle** - Switch between Turkish and English
 
 ## Project Structure
 
-```text
+```
 complier-gui/
-|- electron/            # Electron main process
-|- core/                # Compiler core (API + web + cli + tests)
-|- start_app.bat        # Windows tek komut baslatma
-|- ATTRIBUTION.md       # Kaynak kullanim aciklamasi
-`- README.md
+├── electron/           # Electron main process
+├── core/               # Compiler core (API + web + cli + tests)
+├── start_app.bat       # Windows one-click launcher
+├── ATTRIBUTION.md      # Source attribution details
+└── README.md
 ```
 
 ## Quick Start
 
-### 1) Requirements
+### Prerequisites
 
-- Node.js 18+
-- Python 3.10+
-- Windows (start script icin)
+| Requirement | Version |
+|-------------|---------|
+| Node.js     | 18+     |
+| Python      | 3.10+   |
+| OS          | Windows |
 
-### 2) Install
+### Installation
 
 ```bash
 npm install
 npm run setup
 ```
 
-### 3) Run
+### Running the App
+
+**Development mode:**
 
 ```bash
 npm run dev
 ```
 
-Windows tek tik:
+**Windows one-click launch:**
 
 ```bat
 start_app.bat
@@ -73,31 +79,39 @@ start_app.bat
 
 ## Runtime Endpoints
 
-- Backend: `http://127.0.0.1:8080`
-- Frontend: `http://127.0.0.1:3000`
+| Service  | URL                     |
+|----------|-------------------------|
+| Backend  | `http://127.0.0.1:8080` |
+| Frontend | `http://127.0.0.1:3000` |
 
-## LLM Provider Setup
+## LLM Provider Configuration
 
-Uygulama icindeki `LLM Settings` panelinden su alanlari doldur:
+Open the **LLM Settings** panel in the app and configure:
+
 - Provider
 - Base URL
 - Model
 - API Key
 
-Ayarlar local olarak saklanir.
+Settings are stored locally on your machine.
 
 ## Troubleshooting
 
-### App acilmiyor / uzun bekliyor
+### App not starting or loading slowly
 
-- `core/web` icinde bagimliliklarin kurulu oldugunu kontrol et:
-  - `npm run setup`
-- Python paketlerini kontrol et:
-  - `python -m pip install -r core/requirements.txt`
+1. Ensure frontend dependencies are installed:
+   ```bash
+   npm run setup
+   ```
 
-### Port cakismasi (3000 / 8080)
+2. Verify Python packages:
+   ```bash
+   python -m pip install -r core/requirements.txt
+   ```
 
-`start_app.bat` ve Electron acilisinda stale process temizligi var. Yine de gerekirse elle kapat:
+### Port conflicts (3000 / 8080)
+
+The `start_app.bat` script includes automatic cleanup of stale processes. If issues persist, manually terminate them:
 
 ```bat
 for /f "tokens=5" %a in ('netstat -ano ^| findstr :8080 ^| findstr LISTENING') do taskkill /PID %a /T /F
@@ -106,9 +120,9 @@ for /f "tokens=5" %a in ('netstat -ano ^| findstr :3000 ^| findstr LISTENING') d
 
 ## Attribution
 
-Bu proje, acik kaynak [madara88645/Compiler](https://github.com/madara88645/Compiler) calismasindan yararlanir.
+This project builds upon the open-source [madara88645/Compiler](https://github.com/madara88645/Compiler).
 
-Detayli kaynak kullanim notlari icin:
+For detailed attribution:
 - [`ATTRIBUTION.md`](./ATTRIBUTION.md)
 - [`LICENSE`](./LICENSE)
 
