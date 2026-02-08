@@ -141,13 +141,25 @@ function killProc(proc) {
   if (!proc || proc.killed) return;
   try {
     if (process.platform === "win32") {
-      spawn("taskkill", ["/pid", String(proc.pid), "/T", "/F"], { shell: true, windowsHide: true });
+      execSync(`taskkill /PID ${proc.pid} /T /F`, { windowsHide: true, stdio: "ignore" });
     } else {
       proc.kill("SIGTERM");
     }
   } catch (_err) {
     // ignore shutdown errors
   }
+}
+
+function cleanupAllProcesses() {
+  // Kill tracked child processes
+  killProc(frontendProc);
+  killProc(backendProc);
+
+  // Also kill any remaining processes on ports (belt and suspenders)
+  ensurePortsFree([8080, 3000]);
+
+  frontendProc = null;
+  backendProc = null;
 }
 
 function createWindow() {
@@ -205,11 +217,11 @@ app.whenReady().then(async () => {
 });
 
 app.on("before-quit", () => {
-  killProc(frontendProc);
-  killProc(backendProc);
+  cleanupAllProcesses();
 });
 
 app.on("window-all-closed", () => {
+  cleanupAllProcesses();
   if (process.platform !== "darwin") {
     app.quit();
   }

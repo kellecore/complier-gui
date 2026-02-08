@@ -1,70 +1,800 @@
 @import "tailwindcss";
 
+/* ============================================
+   APPLE-INSPIRED GLASSMORPHISM DESIGN SYSTEM
+   ============================================ */
+
+/* ===========================================
+   1. DESIGN TOKENS - Light & Dark Mode
+   =========================================== */
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card-bg: rgba(24, 24, 27, 0.6);
-  --card-border: rgba(63, 63, 70, 0.4);
-  --primary: #3b82f6;
-  --primary-glow: rgba(59, 130, 246, 0.4);
+  /* === Color Palette === */
+  --apple-blue: #007AFF;
+  --apple-blue-light: #5AC8FA;
+  --apple-green: #34C759;
+  --apple-orange: #FF9500;
+  --apple-pink: #FF2D55;
+  --apple-purple: #AF52DE;
+  --apple-red: #FF3B30;
+  --apple-teal: #5AC8FA;
+  --apple-yellow: #FFCC00;
+
+  /* === Glass Properties === */
+  --glass-blur: 20px;
+  --glass-blur-heavy: 40px;
+  --glass-blur-light: 12px;
+
+  /* === Shadows === */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.24);
+  --shadow-glow: 0 0 40px rgba(0, 122, 255, 0.3);
+
+  /* === Transitions === */
+  --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+
+  /* === Border Radius === */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
+
+  /* === Typography === */
+  --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: -0.011em;
+  --letter-spacing-wide: 0.05em;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
 }
 
+/* === DARK MODE (Default) === */
+[data-theme="dark"], :root {
+  --background: #000000;
+  --background-secondary: #1C1C1E;
+  --background-tertiary: #2C2C2E;
+
+  --foreground: #FFFFFF;
+  --foreground-secondary: rgba(255, 255, 255, 0.7);
+  --foreground-tertiary: rgba(255, 255, 255, 0.5);
+  --foreground-muted: rgba(255, 255, 255, 0.3);
+
+  --glass-bg: rgba(28, 28, 30, 0.72);
+  --glass-bg-light: rgba(44, 44, 46, 0.6);
+  --glass-bg-heavy: rgba(18, 18, 20, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-light: rgba(255, 255, 255, 0.12);
+  --glass-border-heavy: rgba(255, 255, 255, 0.04);
+
+  --surface-elevated: rgba(38, 38, 40, 0.9);
+  --surface-overlay: rgba(0, 0, 0, 0.4);
+
+  --primary: var(--apple-blue);
+  --primary-hover: #0A84FF;
+  --primary-glow: rgba(0, 122, 255, 0.4);
+
+  --separator: rgba(255, 255, 255, 0.08);
+  --separator-opaque: #38383A;
+
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --input-bg-hover: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --input-border-focus: var(--apple-blue);
+}
+
+/* === LIGHT MODE === */
+[data-theme="light"] {
+  --background: #F2F2F7;
+  --background-secondary: #FFFFFF;
+  --background-tertiary: #E5E5EA;
+
+  --foreground: #000000;
+  --foreground-secondary: rgba(0, 0, 0, 0.7);
+  --foreground-tertiary: rgba(0, 0, 0, 0.5);
+  --foreground-muted: rgba(0, 0, 0, 0.3);
+
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-light: rgba(255, 255, 255, 0.85);
+  --glass-bg-heavy: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-border-light: rgba(0, 0, 0, 0.08);
+  --glass-border-heavy: rgba(0, 0, 0, 0.04);
+
+  --surface-elevated: rgba(255, 255, 255, 0.95);
+  --surface-overlay: rgba(255, 255, 255, 0.6);
+
+  --primary: #007AFF;
+  --primary-hover: #0056B3;
+  --primary-glow: rgba(0, 122, 255, 0.25);
+
+  --separator: rgba(0, 0, 0, 0.08);
+  --separator-opaque: #C6C6C8;
+
+  --input-bg: rgba(0, 0, 0, 0.04);
+  --input-bg-hover: rgba(0, 0, 0, 0.06);
+  --input-border: rgba(0, 0, 0, 0.08);
+  --input-border-focus: var(--apple-blue);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* ===========================================
+   2. TAILWIND THEME INTEGRATION
+   =========================================== */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-system);
+  --font-mono: var(--font-mono);
+}
+
+/* ===========================================
+   3. BASE STYLES
+   =========================================== */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: radial-gradient(circle at top center, #1e1e2e 0%, #050510 100%);
+  background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-system);
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  letter-spacing: var(--letter-spacing-normal);
+  line-height: var(--line-height-normal);
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color var(--duration-slow) var(--ease-apple),
+              color var(--duration-slow) var(--ease-apple);
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Dark mode ambient background */
+[data-theme="dark"] body,
+:root body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 122, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(175, 82, 222, 0.06) 0%, transparent 40%),
+    var(--background);
 }
-::-webkit-scrollbar-track {
+
+/* Light mode clean background */
+[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse 100% 100% at 50% -50%, rgba(0, 122, 255, 0.04) 0%, transparent 50%),
+    var(--background);
+}
+
+/* ===========================================
+   4. TYPOGRAPHY
+   =========================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+}
+
+.text-display {
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.text-title-1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.text-title-2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.text-title-3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.text-headline {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.text-body {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-callout {
+  font-size: 0.9375rem;
+  font-weight: 400;
+}
+
+.text-subhead {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.text-footnote {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--foreground-secondary);
+}
+
+.text-caption {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--foreground-tertiary);
+}
+
+/* ===========================================
+   5. GLASSMORPHISM COMPONENTS
+   =========================================== */
+
+/* Base Glass Panel */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--duration-normal) var(--ease-apple);
+}
+
+.glass:hover {
+  border-color: var(--glass-border-light);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Light Glass */
+.glass-light {
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(var(--glass-blur-light)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-light)) saturate(150%);
+  border: 1px solid var(--glass-border-light);
+  box-shadow: var(--shadow-md);
+}
+
+/* Heavy Glass (for overlays, modals) */
+.glass-heavy {
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%);
+  border: 1px solid var(--glass-border-heavy);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Glass Card */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--duration-normal) var(--ease-apple);
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--glass-border-light);
+}
+
+/* Glass Input */
+.glass-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
+  color: var(--foreground);
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  transition: all var(--duration-fast) var(--ease-apple);
+  outline: none;
+}
+
+.glass-input::placeholder {
+  color: var(--foreground-muted);
+}
+
+.glass-input:hover {
+  background: var(--input-bg-hover);
+  border-color: var(--glass-border-light);
+}
+
+.glass-input:focus {
+  background: var(--input-bg-hover);
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+/* ===========================================
+   6. BUTTON SYSTEM
+   =========================================== */
+
+/* Base Button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-apple);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Primary Button */
+.btn-primary {
+  background: linear-gradient(180deg, #0A84FF 0%, #007AFF 100%);
+  color: white;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+    0 2px 8px rgba(0, 122, 255, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #3A9FFF 0%, #0A84FF 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 4px 16px rgba(0, 122, 255, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: linear-gradient(180deg, #007AFF 0%, #0056B3 100%);
+  transform: scale(0.98) translateY(0);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(var(--glass-blur-light));
+  color: var(--foreground);
+  border: 1px solid var(--glass-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--input-bg-hover);
+  border-color: var(--glass-border-light);
+}
+
+/* Ghost Button */
+.btn-ghost {
   background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #3f3f46;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
+  color: var(--primary);
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.btn-ghost:hover:not(:disabled) {
+  background: var(--input-bg);
 }
 
-@keyframes pulseGlow {
-  0% { box-shadow: 0 0 0 0 var(--primary-glow); }
-  70% { box-shadow: 0 0 0 10px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
+/* Icon Button */
+.btn-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border-radius: var(--radius-md);
+  background: var(--input-bg);
+  color: var(--foreground-secondary);
+  border: 1px solid var(--glass-border);
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: var(--input-bg-hover);
+  color: var(--foreground);
+  border-color: var(--glass-border-light);
+}
+
+/* ===========================================
+   7. NAVIGATION & SIDEBAR
+   =========================================== */
+.nav-glass {
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(var(--glass-blur-heavy)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(180%);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.sidebar-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border-right: 1px solid var(--glass-border);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-lg);
+  color: var(--foreground-tertiary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all var(--duration-fast) var(--ease-apple);
+  position: relative;
+}
+
+.nav-item:hover {
+  color: var(--foreground);
+  background: var(--input-bg);
+}
+
+.nav-item.active {
+  color: var(--foreground);
+  background: var(--input-bg-hover);
+  box-shadow: 0 0 0 1px var(--glass-border-light);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 25%;
+  bottom: 25%;
+  width: 3px;
+  background: var(--primary);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
+/* ===========================================
+   8. ANIMATIONS & MICRO-INTERACTIONS
+   =========================================== */
+
+/* Fade In Up */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fadeInUp var(--duration-slow) var(--ease-apple) forwards;
 }
 
-/* Utilities */
-.glass {
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--card-border);
+.animate-fade-in-fast {
+  animation: fadeInUp var(--duration-normal) var(--ease-apple) forwards;
 }
 
-.glass-panel {
-  background: rgba(10, 10, 15, 0.4);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* Scale In */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-normal) var(--ease-spring) forwards;
+}
+
+/* Pulse Glow */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--primary-glow);
+  }
+  50% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s var(--ease-apple) infinite;
+}
+
+/* Shimmer Loading */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--glass-bg) 25%,
+    var(--glass-bg-light) 50%,
+    var(--glass-bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s var(--ease-apple) infinite;
+}
+
+/* Float */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float {
+  animation: float 3s var(--ease-smooth) infinite;
+}
+
+/* Spin Slow */
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 8s linear infinite;
+}
+
+/* Stagger Children Animation */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeInUp var(--duration-slow) var(--ease-apple) forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+
+/* Hover Effects */
+.hover-lift {
+  transition: transform var(--duration-fast) var(--ease-apple),
+              box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.hover-scale {
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.hover-glow {
+  transition: box-shadow var(--duration-normal) var(--ease-apple);
+}
+
+.hover-glow:hover {
+  box-shadow: var(--shadow-glow);
+}
+
+/* ===========================================
+   9. SCROLLBAR
+   =========================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--foreground-muted);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-tertiary);
+  background-clip: content-box;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===========================================
+   10. UTILITIES
+   =========================================== */
+
+/* Separator */
+.separator {
+  height: 1px;
+  background: var(--separator);
+  border: none;
+}
+
+/* Text Colors */
+.text-primary { color: var(--foreground); }
+.text-secondary { color: var(--foreground-secondary); }
+.text-tertiary { color: var(--foreground-tertiary); }
+.text-muted { color: var(--foreground-muted); }
+.text-accent { color: var(--primary); }
+
+/* Background Variations */
+.bg-glass { background: var(--glass-bg); }
+.bg-elevated { background: var(--surface-elevated); }
+.bg-overlay { background: var(--surface-overlay); }
+
+/* Blur Backdrop */
+.backdrop-blur-apple {
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+}
+
+/* Status Indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--apple-green);
+  box-shadow: 0 0 8px var(--apple-green);
+}
+
+.status-dot.offline {
+  background: var(--foreground-muted);
+  box-shadow: none;
+}
+
+.status-dot.warning {
+  background: var(--apple-orange);
+  box-shadow: 0 0 8px var(--apple-orange);
+}
+
+.status-dot.error {
+  background: var(--apple-red);
+  box-shadow: 0 0 8px var(--apple-red);
+}
+
+/* Focus Ring */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Selection */
+::selection {
+  background: var(--primary);
+  color: white;
+}
+
+/* No Select */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ===========================================
+   11. AMBIENT ORBS (Background Effects)
+   =========================================== */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.orb-blue {
+  background: var(--apple-blue);
+}
+
+.orb-purple {
+  background: var(--apple-purple);
+}
+
+.orb-pink {
+  background: var(--apple-pink);
+}
+
+[data-theme="light"] .orb {
+  opacity: 0.3;
+  filter: blur(100px);
+}
+
+/* ===========================================
+   12. RESPONSIVE HELPERS
+   =========================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Touch-friendly sizing on mobile */
+@media (max-width: 768px) {
+  .btn {
+    min-height: 44px;
+    padding: 0.875rem 1.5rem;
+  }
+
+  .glass-input {
+    min-height: 44px;
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+
+  .nav-item {
+    width: 44px;
+    height: 44px;
+  }
 }

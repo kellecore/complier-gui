@@ -83,29 +83,25 @@ export default function Home() {
     }));
   }, []);
 
-  // Sync debounced prompt
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedPrompt(prompt), 600);
     return () => clearTimeout(timer);
   }, [prompt]);
 
-  // Trigger generation on debounced prompt change (if Live Mode is on)
   useEffect(() => {
     if (liveMode && debouncedPrompt.trim()) {
       handleGenerate(debouncedPrompt);
     }
-  }, [debouncedPrompt]); // Removed liveMode dependency to prevent trigger on toggle
+  }, [debouncedPrompt]);
 
   const handleGenerate = useCallback(async (textOverride?: string) => {
     const textToCompile = typeof textOverride === 'string' ? textOverride : prompt;
     if (!textToCompile.trim()) return;
 
     setLoading(true);
-    // 1. Instant Heuristic Feedback (Optimistic UI)
     setStatus(liveMode ? t("Live Compiling...", "Canlı Derleniyor...") : t("Generating (Fast)...", "Oluşturuluyor (Hızlı)..."));
 
     try {
-      // Step A: Fast V1 Request (Skip in Live Mode if user wants pure DeepSeek)
       if (!liveMode) {
         const resV1 = await fetch("http://127.0.0.1:8080/compile", {
           method: "POST",
@@ -130,10 +126,8 @@ export default function Home() {
         setStatus(t("AI Thinking...", "AI Düşünüyor..."));
       }
 
-      // Step B: Slow V2 Request (DeepSeek)
-      // Step B: Slow V2 Request (DeepSeek)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 190000); // 190s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 190000);
 
       try {
         const resV2 = await fetch("http://127.0.0.1:8080/compile", {
@@ -173,34 +167,57 @@ export default function Home() {
     }
   }, [prompt, diagnostics, liveMode, llm, t]);
 
-
+  const tabLabels: Record<string, { en: string; tr: string }> = {
+    system: { en: "System", tr: "Sistem" },
+    user: { en: "User", tr: "Kullanıcı" },
+    plan: { en: "Plan", tr: "Plan" },
+    expanded: { en: "Expanded", tr: "Genişletilmiş" },
+    json: { en: "JSON", tr: "JSON" },
+    quality: { en: "Quality", tr: "Kalite" },
+  };
 
   return (
     <main className="flex h-screen flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
       {/* Ambient Background Orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-blue-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-purple-600/10 blur-[120px] pointer-events-none" />
+      <div className="orb orb-blue absolute top-[-15%] left-[-10%] w-[50vw] h-[50vw] animate-float" style={{ animationDelay: "0s" }} />
+      <div className="orb orb-purple absolute bottom-[-15%] right-[-10%] w-[45vw] h-[45vw] animate-float" style={{ animationDelay: "1.5s" }} />
+      <div className="orb orb-pink absolute top-[50%] right-[10%] w-[20vw] h-[20vw] opacity-30 animate-float" style={{ animationDelay: "3s" }} />
 
       {/* Floating Main Container */}
-      <div className="glass w-full max-w-7xl h-full max-h-[90vh] rounded-3xl flex flex-col shadow-2xl overflow-hidden animate-fade-in ring-1 ring-white/10">
+      <div className="glass-card w-full max-w-7xl h-full max-h-[90vh] flex flex-col overflow-hidden animate-fade-in">
 
         {/* Header */}
-        <header className="border-b border-white/5 bg-black/20 p-4 flex items-center justify-between backdrop-blur-md">
+        <header className="border-b border-[var(--separator)] bg-[var(--surface-overlay)] p-4 flex items-center justify-between backdrop-blur-apple">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">P</div>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-[var(--apple-blue)] blur-lg opacity-40 group-hover:opacity-60 transition-opacity rounded-xl" />
+              <div className="relative h-10 w-10 bg-gradient-to-br from-[#0A84FF] to-[#5E5CE6] rounded-xl flex items-center justify-center font-bold text-white shadow-lg hover-scale">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 18l6-6-6-6" />
+                  <path d="M8 6l-6 6 6 6" />
+                </svg>
+              </div>
+            </div>
             <div>
-              <h1 className="font-semibold text-lg tracking-tight text-white">{t("Prompt Compiler", "Prompt Derleyici")}</h1>
-              <div className="text-[10px] text-zinc-400 font-mono tracking-wider uppercase opacity-70">{t("AI Optimized", "AI Optimize")}</div>
+              <h1 className="text-title-3 text-[var(--foreground)]">{t("Prompt Compiler", "Prompt Derleyici")}</h1>
+              <div className="text-caption">{t("AI Optimized", "AI Optimize")}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className={`px-3 py-1.5 rounded-full text-xs font-medium border flex items-center gap-2 transition-all duration-300 ${liveMode ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'}`}>
-              <div className={`w-1.5 h-1.5 rounded-full ${liveMode ? 'bg-green-400 animate-pulse' : 'bg-zinc-500'}`} />
-              {liveMode ? t('LIVE SYNC', 'CANLI') : t('OFFLINE', 'ÇEVRİMDIŞI')}
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setLiveMode(!liveMode)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 transition-all duration-300 ${
+                liveMode
+                  ? 'bg-[var(--apple-green)]/15 border border-[var(--apple-green)]/30 text-[var(--apple-green)]'
+                  : 'bg-[var(--input-bg)] border border-[var(--glass-border)] text-[var(--foreground-tertiary)]'
+              }`}
+            >
+              <div className={`status-dot ${liveMode ? '' : 'offline'}`} style={{ width: 6, height: 6 }} />
+              {liveMode ? t('LIVE', 'CANLI') : t('MANUAL', 'MANUEL')}
+            </button>
 
-            <div className="text-xs font-mono text-zinc-500 bg-black/30 px-3 py-1.5 rounded-lg border border-white/5 min-w-[100px] text-center">
+            <div className="glass-light px-3 py-1.5 rounded-lg text-xs font-mono text-[var(--foreground-secondary)] min-w-[120px] text-center">
               {status}
             </div>
           </div>
@@ -208,12 +225,12 @@ export default function Home() {
 
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Left Panel: Input */}
-          <div className="w-full md:w-[35%] p-5 flex flex-col gap-5 border-r border-white/5 bg-black/10">
+          <div className="w-full md:w-[38%] p-5 flex flex-col gap-5 border-r border-[var(--separator)] bg-[var(--surface-overlay)]">
 
             <div className="flex-1 flex flex-col relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[var(--apple-blue)]/5 to-[var(--apple-purple)]/5 rounded-2xl pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
               <textarea
-                className="flex-1 w-full bg-black/20 p-5 rounded-2xl border border-white/10 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/50 font-mono text-sm leading-relaxed text-zinc-200 placeholder-zinc-600 transition-all shadow-inner"
+                className="glass-input flex-1 w-full p-5 rounded-2xl resize-none font-mono text-sm leading-relaxed focus-ring"
                 placeholder={t("Describe your prompt idea here... e.g. 'Act as a senior python dev teaching FastAPI'", "Prompt fikrinizi buraya yazın... örn. 'FastAPI öğreten kıdemli bir python geliştirici gibi davran'")}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
@@ -221,11 +238,11 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <div className="rounded-xl border border-white/10 bg-black/20 p-3 space-y-2">
-                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t("LLM Settings", "LLM Ayarları")}</div>
+              <div className="glass-card p-4 space-y-3">
+                <div className="text-caption">{t("LLM Settings", "LLM Ayarları")}</div>
 
                 <select
-                  className="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/10 focus:border-blue-500/40 focus:outline-none"
+                  className="glass-input w-full text-sm"
                   value={llm.provider}
                   onChange={(e) => applyProviderDefaults(e.target.value)}
                 >
@@ -236,45 +253,54 @@ export default function Home() {
                 </select>
 
                 <input
-                  className="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/10 focus:border-blue-500/40 focus:outline-none"
+                  className="glass-input w-full text-sm"
                   placeholder={t("Base URL", "Temel URL")}
                   value={llm.baseUrl}
                   onChange={(e) => setLlm((prev) => ({ ...prev, baseUrl: e.target.value }))}
                 />
                 <input
-                  className="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/10 focus:border-blue-500/40 focus:outline-none"
+                  className="glass-input w-full text-sm"
                   placeholder={t("Model", "Model")}
                   value={llm.model}
                   onChange={(e) => setLlm((prev) => ({ ...prev, model: e.target.value }))}
                 />
                 <input
                   type="password"
-                  className="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/10 focus:border-blue-500/40 focus:outline-none"
+                  className="glass-input w-full text-sm"
                   placeholder={t("API Key", "API Anahtarı")}
                   value={llm.apiKey}
                   onChange={(e) => setLlm((prev) => ({ ...prev, apiKey: e.target.value }))}
                 />
                 <button
                   onClick={saveLlmSettings}
-                  className="w-full px-3 py-2 text-xs font-semibold bg-zinc-800/70 hover:bg-zinc-700 text-zinc-200 rounded-lg border border-white/10 transition-all"
+                  className="btn btn-secondary w-full text-sm"
                 >
                   {t("Save LLM Settings", "LLM Ayarlarını Kaydet")}
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleGenerate()}
-                  disabled={loading}
-                  className="col-span-2 px-4 py-3 text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
-                >
-                  {loading ? (
-                    <span className="animate-pulse">{t("Thinking...", "Düşünüyor...")}</span>
-                  ) : (
-                    <>{t("Generate", "Oluştur")} <span className="group-hover:translate-x-0.5 transition-transform">→</span></>
-                  )}
-                </button>
-              </div>
+              <button
+                onClick={() => handleGenerate()}
+                disabled={loading}
+                className="btn btn-primary w-full py-3.5 text-base font-semibold group"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    {t("Thinking...", "Düşünüyor...")}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    {t("Generate", "Oluştur")}
+                    <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Context Manager */}
@@ -282,45 +308,49 @@ export default function Home() {
           </div>
 
           {/* Right Panel: Output */}
-          <div className="w-full md:w-[65%] flex flex-col bg-black/20 relative">
+          <div className="w-full md:w-[62%] flex flex-col bg-[var(--surface-overlay)] relative">
             {result ? (
               <>
                 {/* Tabs */}
-                <div className="flex border-b border-white/5 px-4 pt-4 gap-2 overflow-x-auto no-scrollbar">
+                <div className="flex border-b border-[var(--separator)] px-4 pt-4 gap-1 overflow-x-auto scrollbar-hide">
                   {(["system", "user", "plan", "expanded", "json", "quality"] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-4 py-2 text-[13px] font-medium rounded-t-lg transition-all relative whitespace-nowrap ${activeTab === tab
-                        ? "text-white bg-white/5 border-t border-x border-white/5"
-                        : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
-                        }`}
+                      className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-all relative whitespace-nowrap ${
+                        activeTab === tab
+                          ? "text-[var(--foreground)] bg-[var(--input-bg-hover)] border-t border-x border-[var(--glass-border-light)]"
+                          : "text-[var(--foreground-tertiary)] hover:text-[var(--foreground-secondary)] hover:bg-[var(--input-bg)]"
+                      }`}
                     >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      {t(tabLabels[tab].en, tabLabels[tab].tr)}
+                      {activeTab === tab && (
+                        <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-[var(--apple-blue)] rounded-full" />
+                      )}
                     </button>
                   ))}
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-0 overflow-hidden relative group bg-black/20">
+                <div className="flex-1 p-0 overflow-hidden relative group">
                   {activeTab !== "quality" && activeTab !== "json" && (
                     <>
-                      <div className="absolute top-4 right-6 z-10 opacity-50 hover:opacity-100 transition-opacity">
+                      <div className="absolute top-4 right-6 z-10 opacity-60 hover:opacity-100 transition-opacity">
                         {result.system_prompt_v2 ? (
-                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]" />
-                            <span className="text-[10px] text-blue-200 font-medium">{t("Reasoning Model", "Akıl Yürütme Modeli")}</span>
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--apple-blue)]/10 border border-[var(--apple-blue)]/20">
+                            <div className="status-dot" style={{ width: 6, height: 6, background: 'var(--apple-blue)', boxShadow: '0 0 8px var(--apple-blue)' }} />
+                            <span className="text-xs font-medium text-[var(--apple-blue)]">{t("Reasoning Model", "Akıl Yürütme Modeli")}</span>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-800/50 border border-zinc-700/50">
-                            <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                            <span className="text-[10px] text-zinc-400 font-medium">{t("Standard", "Standart")}</span>
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--input-bg)] border border-[var(--glass-border)]">
+                            <div className="status-dot offline" style={{ width: 6, height: 6 }} />
+                            <span className="text-xs font-medium text-[var(--foreground-tertiary)]">{t("Standard", "Standart")}</span>
                           </div>
                         )}
                       </div>
 
                       <textarea
-                        className="w-full h-full bg-transparent p-6 font-mono text-sm text-zinc-300 resize-none focus:outline-none leading-relaxed selection:bg-blue-500/30"
+                        className="w-full h-full bg-transparent p-6 font-mono text-sm text-[var(--foreground-secondary)] resize-none focus:outline-none leading-relaxed selection:bg-[var(--apple-blue)]/30"
                         readOnly
                         value={
                           activeTab === "system" ? (result.system_prompt_v2 || result.system_prompt) :
@@ -337,26 +367,27 @@ export default function Home() {
                               activeTab === "plan" ? (result.plan_v2 || result.plan) :
                                 (result.expanded_prompt_v2 || result.expanded_prompt)
                         )}
-                        className="absolute bottom-6 right-6 bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 z-20"
+                        className="btn btn-primary absolute bottom-6 right-6 p-3 rounded-xl hover-lift z-20"
                         title={t("Copy to Clipboard", "Panoya Kopyala")}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
                       </button>
                     </>
                   )}
 
-                  {/* JSON Structured View */}
                   {activeTab === "json" && (
-                    <div className="absolute inset-0 bg-transparent z-20 overflow-auto p-6">
-                      <pre className="bg-black/30 p-4 rounded-xl border border-white/5 text-xs font-mono text-zinc-300 overflow-auto h-full shadow-inner">
+                    <div className="absolute inset-0 z-20 overflow-auto p-6">
+                      <pre className="glass-light p-4 rounded-xl text-xs font-mono text-[var(--foreground-secondary)] overflow-auto h-full">
                         {JSON.stringify(result, null, 2)}
                       </pre>
                     </div>
                   )}
 
-                  {/* Quality Coach Overlay/View */}
                   {activeTab === "quality" && (
-                    <div className="absolute inset-0 bg-transparent z-20">
+                    <div className="absolute inset-0 z-20">
                       <QualityCoach
                         prompt={prompt}
                         onUpdatePrompt={setPrompt}
@@ -372,16 +403,27 @@ export default function Home() {
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-zinc-600 gap-6 p-10 text-center opacity-60">
+              <div className="flex-1 flex flex-col items-center justify-center gap-8 p-10 text-center animate-fade-in">
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-blue-500/30 blur-[40px] rounded-full group-hover:bg-blue-500/50 transition-all duration-700" />
-                  <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-zinc-800 to-black border border-white/10 flex items-center justify-center shadow-2xl skew-y-3 group-hover:skew-y-0 transition-transform duration-500">
-                    <span className="text-4xl filter drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">💠</span>
+                  <div className="absolute inset-0 bg-[var(--apple-blue)]/20 blur-[60px] rounded-full group-hover:bg-[var(--apple-blue)]/30 transition-all duration-700" />
+                  <div className="relative w-28 h-28 rounded-3xl glass-card flex items-center justify-center shadow-2xl hover-lift group-hover:shadow-[var(--shadow-glow)] transition-all duration-500">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#gradient)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="animate-float">
+                      <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="var(--apple-blue)" />
+                          <stop offset="100%" stopColor="var(--apple-purple)" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M16 18l6-6-6-6" />
+                      <path d="M8 6l-6 6 6 6" />
+                    </svg>
                   </div>
                 </div>
-                <div className="max-w-xs space-y-2">
-                  <h3 className="text-zinc-200 font-medium tracking-wide">{t("Ready to Compile", "Derlemeye Hazır")}</h3>
-                  <p className="text-sm text-zinc-500">{t("Enter a prompt to generate optimized system instructions, planning, and structured reasoning.", "Optimize edilmiş sistem talimatları, planlama ve yapılandırılmış akıl yürütme oluşturmak için bir prompt girin.")}</p>
+                <div className="max-w-sm space-y-3">
+                  <h3 className="text-title-2 text-[var(--foreground)]">{t("Ready to Compile", "Derlemeye Hazır")}</h3>
+                  <p className="text-body text-[var(--foreground-tertiary)]">
+                    {t("Enter a prompt to generate optimized system instructions, planning, and structured reasoning.", "Optimize edilmiş sistem talimatları, planlama ve yapılandırılmış akıl yürütme oluşturmak için bir prompt girin.")}
+                  </p>
                 </div>
               </div>
             )}

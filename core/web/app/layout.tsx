@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Complier GUI",
-  description: "Prompt Compiler masaustu arayuzu",
+  description: "Prompt Compiler masaüstü arayüzü",
 };
 
 export default function RootLayout({
@@ -24,11 +24,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr">
+    <html lang="tr" data-theme="dark" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex h-screen bg-[#050505] text-zinc-300 overflow-hidden">
+        <div className="flex h-screen overflow-hidden">
           {/* Sidebar Navigation */}
           <Sidebar />
 
