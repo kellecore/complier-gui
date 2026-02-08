@@ -1,7 +1,7 @@
 const path = require("node:path");
 const { spawn } = require("node:child_process");
 const { execSync } = require("node:child_process");
-const { app, BrowserWindow, dialog } = require("electron");
+const { app, BrowserWindow, dialog, Menu } = require("electron");
 
 const ROOT = path.join(__dirname, "..");
 const CORE_DIR = path.join(ROOT, "core");
@@ -152,12 +152,13 @@ function killProc(proc) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
+    title: "Complier GUI",
     width: 1600,
     height: 980,
     minWidth: 1200,
     minHeight: 760,
     backgroundColor: "#0a0f1e",
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -165,6 +166,8 @@ function createWindow() {
     }
   });
 
+  mainWindow.setMenuBarVisibility(false);
+  mainWindow.removeMenu();
   mainWindow.loadURL(FRONTEND_URL);
 }
 
@@ -187,6 +190,7 @@ async function startServices() {
 
 app.whenReady().then(async () => {
   try {
+    Menu.setApplicationMenu(null);
     await startServices();
     createWindow();
   } catch (err) {
