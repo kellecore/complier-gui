@@ -27,12 +27,12 @@ type LLMSettings = {
 const LLM_SETTINGS_KEY = "complier_gui_llm_settings";
 
 const providerDefaults: Record<string, { baseUrl: string; model: string }> = {
-  openai_compatible: { baseUrl: "https://api.deepseek.com/v1", model: "deepseek-chat" },
-  openai: { baseUrl: "https://api.openai.com/v1", model: "gpt-4o-mini" },
-  anthropic: { baseUrl: "https://api.anthropic.com/v1", model: "claude-3-5-sonnet-20241022" },
+  openai_compatible: { baseUrl: "", model: "" },
+  openai: { baseUrl: "https://api.openai.com/v1", model: "" },
+  anthropic: { baseUrl: "https://api.anthropic.com/v1", model: "" },
   gemini: {
     baseUrl: "https://generativelanguage.googleapis.com",
-    model: "gemini-1.5-flash",
+    model: "",
   },
 };
 
@@ -48,8 +48,8 @@ export default function Home() {
   const [llm, setLlm] = useState<LLMSettings>({
     provider: "openai_compatible",
     apiKey: "",
-    baseUrl: providerDefaults.openai_compatible.baseUrl,
-    model: providerDefaults.openai_compatible.model,
+    baseUrl: "",
+    model: "",
   });
 
   useEffect(() => {
