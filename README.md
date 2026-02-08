@@ -1,6 +1,10 @@
 # Complier GUI
 
 <p align="center">
+  <img src="https://i.ibb.co/VWfVJ5Yx/0-F8-F07-D2-5-DE1-42-EB-9-B49-BD003-EFF2-D8-A.png" alt="Complier GUI Screenshot" width="800" />
+</p>
+
+<p align="center">
   <strong>Desktop-first Prompt Compiler experience powered by Electron + FastAPI + Next.js</strong>
 </p>
 

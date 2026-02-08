@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import ContextManager from "./components/ContextManager";
 import QualityCoach from "./components/QualityCoach";
+import { useAppLanguage } from "./lib/i18n";
 
 type CompileResponse = {
   system_prompt: string;
@@ -37,13 +38,14 @@ const providerDefaults: Record<string, { baseUrl: string; model: string }> = {
 };
 
 export default function Home() {
+  const { t } = useAppLanguage();
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CompileResponse | null>(null);
   const [activeTab, setActiveTab] = useState<"system" | "user" | "plan" | "expanded" | "json" | "quality">("system");
   const [liveMode, setLiveMode] = useState(true);
   const [diagnostics, setDiagnostics] = useState(true);
-  const [status, setStatus] = useState("Ready");
+  const [status, setStatus] = useState(t("Ready", "Hazır"));
   const [debouncedPrompt, setDebouncedPrompt] = useState("");
   const [llm, setLlm] = useState<LLMSettings>({
     provider: "openai_compatible",
@@ -68,8 +70,8 @@ export default function Home() {
 
   const saveLlmSettings = useCallback(() => {
     localStorage.setItem(LLM_SETTINGS_KEY, JSON.stringify(llm));
-    setStatus("LLM settings saved");
-  }, [llm]);
+    setStatus(t("LLM settings saved", "LLM ayarları kaydedildi"));
+  }, [llm, t]);
 
   const applyProviderDefaults = useCallback((provider: string) => {
     const defaults = providerDefaults[provider] || providerDefaults.openai_compatible;
@@ -100,7 +102,7 @@ export default function Home() {
 
     setLoading(true);
     // 1. Instant Heuristic Feedback (Optimistic UI)
-    setStatus(liveMode ? "Live Compiling..." : "Generating (Fast)...");
+    setStatus(liveMode ? t("Live Compiling...", "Canlı Derleniyor...") : t("Generating (Fast)...", "Oluşturuluyor (Hızlı)..."));
 
     try {
       // Step A: Fast V1 Request (Skip in Live Mode if user wants pure DeepSeek)
@@ -122,10 +124,10 @@ export default function Home() {
         if (resV1.ok) {
           const dataV1 = await resV1.json();
           setResult(dataV1);
-          setStatus("Reasoning with Advanced AI...");
+          setStatus(t("Reasoning with Advanced AI...", "Gelişmiş AI ile Analiz Ediliyor..."));
         }
       } else {
-        setStatus("AI Thinking...");
+        setStatus(t("AI Thinking...", "AI Düşünüyor..."));
       }
 
       // Step B: Slow V2 Request (DeepSeek)
@@ -155,21 +157,21 @@ export default function Home() {
 
         const dataV2 = await resV2.json();
         setResult(dataV2);
-        setStatus(`Done in ${dataV2.processing_ms}ms`);
+        setStatus(t(`Done in ${dataV2.processing_ms}ms`, `${dataV2.processing_ms}ms'de Tamamlandı`));
       } catch (e: any) {
         if (e.name === 'AbortError') {
-          throw new Error("Timeout: AI Model took too long to respond.");
+          throw new Error(t("Timeout: AI Model took too long to respond.", "Zaman Aşımı: AI Modeli yanıt vermesi çok uzun sürdü."));
         }
         throw e;
       }
 
     } catch (e: any) {
       console.error(e);
-      setStatus(`Error: ${e.message || "Connection Failed"}`);
+      setStatus(`${t("Error", "Hata")}: ${e.message || t("Connection Failed", "Bağlantı Başarısız")}`);
     } finally {
       setLoading(false);
     }
-  }, [prompt, diagnostics, liveMode, llm]);
+  }, [prompt, diagnostics, liveMode, llm, t]);
 
 
 
@@ -187,15 +189,15 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">P</div>
             <div>
-              <h1 className="font-semibold text-lg tracking-tight text-white">Prompt Compiler</h1>
-              <div className="text-[10px] text-zinc-400 font-mono tracking-wider uppercase opacity-70">AI Optimized</div>
+              <h1 className="font-semibold text-lg tracking-tight text-white">{t("Prompt Compiler", "Prompt Derleyici")}</h1>
+              <div className="text-[10px] text-zinc-400 font-mono tracking-wider uppercase opacity-70">{t("AI Optimized", "AI Optimize")}</div>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             <div className={`px-3 py-1.5 rounded-full text-xs font-medium border flex items-center gap-2 transition-all duration-300 ${liveMode ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'}`}>
               <div className={`w-1.5 h-1.5 rounded-full ${liveMode ? 'bg-green-400 animate-pulse' : 'bg-zinc-500'}`} />
-              {liveMode ? 'LIVE SYNC' : 'OFFLINE'}
+              {liveMode ? t('LIVE SYNC', 'CANLI') : t('OFFLINE', 'ÇEVRİMDIŞI')}
             </div>
 
             <div className="text-xs font-mono text-zinc-500 bg-black/30 px-3 py-1.5 rounded-lg border border-white/5 min-w-[100px] text-center">
@@ -212,7 +214,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
               <textarea
                 className="flex-1 w-full bg-black/20 p-5 rounded-2xl border border-white/10 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/50 font-mono text-sm leading-relaxed text-zinc-200 placeholder-zinc-600 transition-all shadow-inner"
-                placeholder="Describe your prompt idea here... e.g. 'Act as a senior python dev teaching FastAPI'"
+                placeholder={t("Describe your prompt idea here... e.g. 'Act as a senior python dev teaching FastAPI'", "Prompt fikrinizi buraya yazın... örn. 'FastAPI öğreten kıdemli bir python geliştirici gibi davran'")}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
               />
@@ -220,7 +222,7 @@ export default function Home() {
 
             <div className="flex flex-col gap-4">
               <div className="rounded-xl border border-white/10 bg-black/20 p-3 space-y-2">
-                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">LLM Settings</div>
+                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t("LLM Settings", "LLM Ayarları")}</div>
 
                 <select
                   className="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/10 focus:border-blue-500/40 focus:outline-none"
@@ -235,20 +237,20 @@ export default function Home() {
 
                 <input
                   className="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/10 focus:border-blue-500/40 focus:outline-none"
-                  placeholder="Base URL"
+                  placeholder={t("Base URL", "Temel URL")}
                   value={llm.baseUrl}
                   onChange={(e) => setLlm((prev) => ({ ...prev, baseUrl: e.target.value }))}
                 />
                 <input
                   className="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/10 focus:border-blue-500/40 focus:outline-none"
-                  placeholder="Model"
+                  placeholder={t("Model", "Model")}
                   value={llm.model}
                   onChange={(e) => setLlm((prev) => ({ ...prev, model: e.target.value }))}
                 />
                 <input
                   type="password"
                   className="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/10 focus:border-blue-500/40 focus:outline-none"
-                  placeholder="API Key"
+                  placeholder={t("API Key", "API Anahtarı")}
                   value={llm.apiKey}
                   onChange={(e) => setLlm((prev) => ({ ...prev, apiKey: e.target.value }))}
                 />
@@ -256,7 +258,7 @@ export default function Home() {
                   onClick={saveLlmSettings}
                   className="w-full px-3 py-2 text-xs font-semibold bg-zinc-800/70 hover:bg-zinc-700 text-zinc-200 rounded-lg border border-white/10 transition-all"
                 >
-                  Save LLM Settings
+                  {t("Save LLM Settings", "LLM Ayarlarını Kaydet")}
                 </button>
               </div>
 
@@ -267,9 +269,9 @@ export default function Home() {
                   className="col-span-2 px-4 py-3 text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
                 >
                   {loading ? (
-                    <span className="animate-pulse">Thinking...</span>
+                    <span className="animate-pulse">{t("Thinking...", "Düşünüyor...")}</span>
                   ) : (
-                    <>Generate <span className="group-hover:translate-x-0.5 transition-transform">→</span></>
+                    <>{t("Generate", "Oluştur")} <span className="group-hover:translate-x-0.5 transition-transform">→</span></>
                   )}
                 </button>
               </div>
@@ -307,12 +309,12 @@ export default function Home() {
                         {result.system_prompt_v2 ? (
                           <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20">
                             <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]" />
-                            <span className="text-[10px] text-blue-200 font-medium">Reasoning Model</span>
+                            <span className="text-[10px] text-blue-200 font-medium">{t("Reasoning Model", "Akıl Yürütme Modeli")}</span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-800/50 border border-zinc-700/50">
                             <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                            <span className="text-[10px] text-zinc-400 font-medium">Standard</span>
+                            <span className="text-[10px] text-zinc-400 font-medium">{t("Standard", "Standart")}</span>
                           </div>
                         )}
                       </div>
@@ -336,7 +338,7 @@ export default function Home() {
                                 (result.expanded_prompt_v2 || result.expanded_prompt)
                         )}
                         className="absolute bottom-6 right-6 bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 z-20"
-                        title="Copy to Clipboard"
+                        title={t("Copy to Clipboard", "Panoya Kopyala")}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
                       </button>
@@ -378,8 +380,8 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="max-w-xs space-y-2">
-                  <h3 className="text-zinc-200 font-medium tracking-wide">Ready to Compile</h3>
-                  <p className="text-sm text-zinc-500">Enter a prompt to generate optimized system instructions, planning, and structured reasoning.</p>
+                  <h3 className="text-zinc-200 font-medium tracking-wide">{t("Ready to Compile", "Derlemeye Hazır")}</h3>
+                  <p className="text-sm text-zinc-500">{t("Enter a prompt to generate optimized system instructions, planning, and structured reasoning.", "Optimize edilmiş sistem talimatları, planlama ve yapılandırılmış akıl yürütme oluşturmak için bir prompt girin.")}</p>
                 </div>
               </div>
             )}
