@@ -1,0 +1,17 @@
+{
+  "name": "complier-gui",
+  "version": "1.0.0",
+  "description": "Electron shell for full Prompt Compiler with provider-extended backend",
+  "main": "electron/main.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "electron .",
+    "start": "electron .",
+    "install:core:web": "cd core/web && npm install",
+    "install:core:py": "python -m pip install -r core/requirements.txt",
+    "setup": "npm run install:core:web && npm run install:core:py"
+  },
+  "dependencies": {
+    "electron": "^33.2.0"
+  }
+}

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.build/
+*.egg-info/
+.eggs/
+.dist/
+.build/
+.coverage*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Local exports / artifacts
+out/
+
+# VS Code
+.vscode/
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Secrets
+.env
+.env.*
