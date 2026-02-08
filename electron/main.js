@@ -1,5 +1,6 @@
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const { execSync } = require("node:child_process");
 const { app, BrowserWindow, dialog } = require("electron");
 
 const ROOT = path.join(__dirname, "..");
@@ -13,14 +14,29 @@ let frontendProc = null;
 let mainWindow = null;
 const ENABLE_CHILD_LOG_PIPE = process.env.ELECTRON_CHILD_LOG_PIPE === "1";
 
+function isBrokenPipeError(err) {
+  if (!err) return false;
+  const message = String(err.message || "").toLowerCase();
+  return err.code === "EPIPE" || message.includes("epipe") || message.includes("broken pipe");
+}
+
+function guardStreamErrors(stream) {
+  if (!stream || typeof stream.on !== "function") return;
+  stream.on("error", (err) => {
+    // Logging streams can be unavailable in detached Electron launches on Windows.
+    if (isBrokenPipeError(err)) return;
+  });
+}
+
+guardStreamErrors(process.stdout);
+guardStreamErrors(process.stderr);
+
 function safeWrite(stream, message) {
   if (!stream || !stream.writable) return;
   try {
     stream.write(message);
-  } catch (err) {
-    // In some Electron launches stdout/stderr pipe can be closed (EPIPE).
-    if (err && err.code === "EPIPE") return;
-    throw err;
+  } catch (_err) {
+    // Never let logging crash the application.
   }
 }
 
@@ -59,6 +75,43 @@ async function waitForService(url, proc, timeoutMs, serviceName) {
   return false;
 }
 
+function findWindowsPidsByPort(port) {
+  try {
+    const out = execSync(`netstat -ano | findstr :${port}`, {
+      windowsHide: true,
+      encoding: "utf8"
+    });
+    const pids = new Set();
+    for (const line of out.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      if (!trimmed.includes("LISTENING")) continue;
+      const parts = trimmed.split(/\s+/);
+      const pid = Number(parts[parts.length - 1]);
+      if (Number.isFinite(pid) && pid > 0) {
+        pids.add(pid);
+      }
+    }
+    return [...pids];
+  } catch (_err) {
+    return [];
+  }
+}
+
+function ensurePortsFree(ports) {
+  if (process.platform !== "win32") return;
+  for (const port of ports) {
+    const pids = findWindowsPidsByPort(port);
+    for (const pid of pids) {
+      try {
+        execSync(`taskkill /PID ${pid} /T /F`, { windowsHide: true, stdio: "ignore" });
+      } catch (_err) {
+        // best effort only
+      }
+    }
+  }
+}
+
 function spawnProcess(command, args, cwd, env = {}) {
   const child = spawn(command, args, {
     cwd,
@@ -69,11 +122,13 @@ function spawnProcess(command, args, cwd, env = {}) {
   });
   if (ENABLE_CHILD_LOG_PIPE) {
     if (child.stdout) {
+      guardStreamErrors(child.stdout);
       child.stdout.on("data", (chunk) => {
         safeWrite(process.stdout, `[${path.basename(cwd)}] ${chunk}`);
       });
     }
     if (child.stderr) {
+      guardStreamErrors(child.stderr);
       child.stderr.on("data", (chunk) => {
         safeWrite(process.stderr, `[${path.basename(cwd)}] ${chunk}`);
       });
@@ -114,6 +169,9 @@ function createWindow() {
 }
 
 async function startServices() {
+  // Cleanup stale processes from previous runs.
+  ensurePortsFree([8080, 3000]);
+
   backendProc = spawnProcess("python", ["-m", "uvicorn", "api.main:app", "--host", "127.0.0.1", "--port", "8080"], CORE_DIR);
   const backendReady = await waitForService(BACKEND_URL, backendProc, 90000, "Backend");
   if (!backendReady) {
